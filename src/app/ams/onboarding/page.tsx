@@ -216,7 +216,7 @@ export default function AmsOnboardingPage() {
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-6 gap-2 sm:gap-3 mt-3">
+                  <div className="flex justify-between gap-2 sm:gap-3 mt-3">
                     {[0, 1, 2, 3, 4, 5].map((index) => (
                       <input
                         key={index}
@@ -227,7 +227,7 @@ export default function AmsOnboardingPage() {
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                         disabled={!otpSent}
-                        className="w-full h-12 sm:h-14 text-center text-lg sm:text-xl font-bold bg-[#ffffff] border border-[#d4d4dc] rounded-xl focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow disabled:bg-[#f7f7f9] disabled:text-[#6b6b80] text-[#1a1a2e]"
+                        className="flex-1 min-w-0 h-12 sm:h-14 text-center text-lg sm:text-xl font-bold bg-[#ffffff] border border-[#d4d4dc] rounded-xl focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow disabled:bg-[#f7f7f9] disabled:text-[#6b6b80] text-[#1a1a2e]"
                       />
                     ))}
                   </div>
