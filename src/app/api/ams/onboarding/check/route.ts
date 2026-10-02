@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const { data: adminRow } = await supabaseAdmin
       .from("academic_admin_assignments")
-      .select("*")
+      .select("*, institution:institutions(name)")
       .eq("email", user.email)
       .eq("status", "pending_onboarding")
       .maybeSingle();
