@@ -36,9 +36,10 @@ export async function POST(request: NextRequest) {
 
     // 3. SEND OTP via Brevo
     const apiKey = process.env.BREVO_API_KEY || process.env.BREVO_SMTP_PASS;
-    const smtpUser = process.env.BREVO_SENDER_EMAIL || process.env.BREVO_SMTP_USER || "no-reply@skilllinkr.com";
+    const smtpAuthUser = process.env.BREVO_SMTP_USER;
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || "no-reply@skilllinkr.com";
 
-    if (!apiKey || !smtpUser) {
+    if (!apiKey || !smtpAuthUser) {
       console.log(`[LOCAL DEV MODE] No Brevo config found. Verification code for ${realEmail} is: ${otp}`);
       return NextResponse.json({ success: true, message: 'Local Dev Mode: Verification code generated. Check server logs.', devOtp: otp });
     }
@@ -48,13 +49,13 @@ export async function POST(request: NextRequest) {
       port: 587,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: smtpUser, // e.g. a46a18001@smtp-brevo.com
+        user: smtpAuthUser, // e.g. a46a18001@smtp-brevo.com
         pass: apiKey, // The xsmtpsib-... password
       },
     });
 
     const info = await transporter.sendMail({
-      from: `"SkillLinkr" <${smtpUser}>`,
+      from: `"SkillLinkr" <${senderEmail}>`,
       to: realEmail,
       subject: "SkillLinkr - Admin Onboarding Verification Code",
       html: `
