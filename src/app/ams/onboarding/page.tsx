@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { ShieldCheck, CheckCircle, AlertCircle, Key, User, Building, Briefcase, Phone, Eye, EyeOff } from "lucide-react";
@@ -31,6 +31,19 @@ export default function AmsOnboardingPage() {
       if (res.ok && data.status === "pending_onboarding") {
         setUser(data.user);
         setAdminData(data.adminData);
+          
+          // Auto-trigger OTP sending if not already sent
+          if (!otpSent && !isSendingOtp) {
+            fetch("/api/ams/onboarding/send-otp", { method: "POST" })
+              .then(res => res.json())
+              .then(otpData => {
+                if (otpData.success) {
+                  setOtpSent(true);
+                  setMessage({ text: otpData.message || "Verification code automatically sent to your email!", type: "success" });
+                }
+              })
+              .catch(err => console.error("Auto-OTP Error:", err));
+          }
       } else {
         router.push("/ams");
       }
