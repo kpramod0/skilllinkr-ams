@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
         created_at,
         institution:institutions(id, name, code)
       `)
+      .eq("status", "pending")
       .order("created_at", { ascending: false });
 
     return NextResponse.json({ 
