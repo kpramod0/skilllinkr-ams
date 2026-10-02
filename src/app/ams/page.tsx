@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { 
@@ -15,6 +15,8 @@ export default function AmsDashboardPage() {
     isSuperAdmin: boolean;
     isAdmin: boolean;
     domain: string | null;
+    institutionId: string | null;
+    institutionName: string | null;
     status: string;
   } | null>(null);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
@@ -26,6 +28,7 @@ export default function AmsDashboardPage() {
   const [importMode, setImportMode] = useState<"student" | "faculty">("student");
 
   const [metrics, setMetrics] = useState<{institutions:number, administrators:number, activeCycles:number, projects:number} | null>(null);
+  const [adminMetrics, setAdminMetrics] = useState<{eligibleStudents:number, allocatedProjects:number, activeCycles:number} | null>(null);
   const [institutions, setInstitutions] = useState<any[]>([]);
   const [adminsData, setAdminsData] = useState<{admins:any[], invitations:any[]}>({admins:[], invitations:[]});
   const [inviteEmail, setInviteEmail] = useState("");
@@ -87,14 +90,24 @@ export default function AmsDashboardPage() {
         }
         if (data.access.isAdmin) {
           fetchRosterRequests();
+          fetchAdminMetrics();
         }
       } else {
-        setAccess({ isSuperAdmin: false, isAdmin: false, domain: null, status: "denied" });
+        setAccess({ isSuperAdmin: false, isAdmin: false, domain: null, institutionId: null, institutionName: null, status: "denied" });
       }
     } catch (err) {
-      setAccess({ isSuperAdmin: false, isAdmin: false, domain: null, status: "error" });
+      setAccess({ isSuperAdmin: false, isAdmin: false, domain: null, institutionId: null, institutionName: null, status: "error" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAdminMetrics = async () => {
+    try {
+      const res = await fetch("/api/ams/admin/metrics");
+      if (res.ok) setAdminMetrics(await res.json());
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -242,8 +255,8 @@ export default function AmsDashboardPage() {
             Your account <span className="text-[#10b981] font-semibold">{user?.email || "Unknown"}</span> lacks administrative privileges.
           </p>
           <div className="text-left bg-[#f7f7f9] border border-[#d4d4dc] rounded-xl p-4 mb-6">
-            <p className="text-xs text-[#6b6b80] mb-1">• Your student/faculty session is active.</p>
-            <p className="text-xs text-[#6b6b80]">• Please contact your university to request an admin invitation.</p>
+            <p className="text-xs text-[#6b6b80] mb-1">â€¢ Your student/faculty session is active.</p>
+            <p className="text-xs text-[#6b6b80]">â€¢ Please contact your university to request an admin invitation.</p>
           </div>
           <Link href="/main/academic" className="inline-flex items-center justify-center w-full px-6 py-3 bg-[#10b981] hover:bg-teal-700 text-[#ffffff] font-medium rounded-xl text-sm transition-colors shadow-sm">
             Return to Main Portal
@@ -415,7 +428,7 @@ export default function AmsDashboardPage() {
           <div className="space-y-8">
             <div>
               <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Academic Dashboard</h2>
-              <p className="text-sm text-[#6b6b80] mt-1">Manage academic projects and allocations for <span className="font-semibold text-[#1a1a2e]">{access.domain}</span>.</p>
+              <p className="text-sm text-[#6b6b80] mt-1">Manage academic projects and allocations for <span className="font-semibold text-[#1a1a2e]">{access.institutionName ?? access.domain}</span>.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -424,7 +437,7 @@ export default function AmsDashboardPage() {
                   <span className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Eligible Students</span>
                   <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><Users className="w-4 h-4" /></div>
                 </div>
-                <p className="text-3xl font-bold text-[#1a1a2e]">1,240</p>
+                <p className="text-3xl font-bold text-[#1a1a2e]">{adminMetrics?.eligibleStudents ?? "—"}</p>
                 <p className="text-xs text-[#6b6b80] font-medium mt-2">Active in current cycle</p>
               </div>
 
@@ -442,7 +455,7 @@ export default function AmsDashboardPage() {
                   <span className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Allocated Projects</span>
                   <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Briefcase className="w-4 h-4" /></div>
                 </div>
-                <p className="text-3xl font-bold text-[#1a1a2e]">86</p>
+                <p className="text-3xl font-bold text-[#1a1a2e]">{adminMetrics?.allocatedProjects ?? "—"}</p>
                 <p className="text-xs text-emerald-600 font-medium mt-2 flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Active Assignments</p>
               </div>
             </div>
@@ -507,7 +520,7 @@ export default function AmsDashboardPage() {
                         <span>Target: <span className="text-[#1a1a2e]">{req.target_student_id}</span></span>
                         {req.replacement_student_id && (
                           <>
-                            <span className="text-slate-300">→</span>
+                            <span className="text-slate-300">â†’</span>
                             <span>Replacement: <span className="text-[#1a1a2e]">{req.replacement_student_id}</span></span>
                           </>
                         )}
@@ -705,7 +718,7 @@ export default function AmsDashboardPage() {
                               <p className="text-sm font-bold text-[#1a1a2e]">{a.admin_name || a.user_id}</p>
                               <div className="flex items-center gap-2 text-xs font-mono text-[#6b6b80] mt-0.5">
                                 <span>{a.user_id}</span>
-                                <span className="text-slate-300">•</span>
+                                <span className="text-slate-300">â€¢</span>
                                 <span>{a.university_name || a.university_domain}</span>
                               </div>
                               {(a.admin_position || a.contact_no) && (
@@ -990,3 +1003,6 @@ export default function AmsDashboardPage() {
     </AmsShell>
   );
 }
+
+
+

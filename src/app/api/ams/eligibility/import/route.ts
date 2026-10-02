@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { checkAmsAccess, enforceAmsMfa } from "@/lib/academic-ams-service";
 import { supabaseAdmin } from "@/lib/supabase-admin";
@@ -7,7 +7,7 @@ import ExcelJS from "exceljs";
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
 const MAX_ROWS = 2000;
 
-// Allowed MIME types — no Excel macros (.xlsm), no XML (.xml) workbooks
+// Allowed MIME types â€” no Excel macros (.xlsm), no XML (.xml) workbooks
 const ALLOWED_MIME_TYPES = [
   "text/csv",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     // MFA STEP-UP: Ensure AAL2 for AMS administrative actions
     await enforceAmsMfa(supabase);
 
-    const access = await checkAmsAccess(user.email);
+    const access = await checkAmsAccess(user.id);
     if (!access.isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
     const formData = await request.formData();
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `File too large. Maximum is ${MAX_FILE_BYTES / 1024 / 1024}MB` }, { status: 413 });
     }
 
-    // MIME type guard — reject macros, XML, binary
+    // MIME type guard â€” reject macros, XML, binary
     if (!ALLOWED_MIME_TYPES.includes(file.type) && !file.name.endsWith(".csv") && !file.name.endsWith(".xlsx")) {
       return NextResponse.json({ error: "Unsupported file type. Only .csv or .xlsx files are accepted." }, { status: 415 });
     }
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         lines.push(rowValues.join(","));
       });
     } else {
-      // Parse CSV content (no formula execution — read as plain text)
+      // Parse CSV content (no formula execution â€” read as plain text)
       const rawText = await file.text();
       lines = rawText.split(/\r?\n/).filter(l => l.trim());
     }
@@ -311,7 +311,7 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.email) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 
-    const access = await checkAmsAccess(user.email);
+    const access = await checkAmsAccess(user.id);
     if (!access.isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
     const template = [
@@ -331,3 +331,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+

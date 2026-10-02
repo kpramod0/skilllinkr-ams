@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -49,13 +49,8 @@ export default function AmsLoginPage() {
             setIsLoading(true);
             setError("");
 
-            // Append .ams to separate the identity from Main SkillLinkr
-            const amsAuthEmail = email.toLowerCase().trim().endsWith(".ams") 
-                ? email.toLowerCase().trim() 
-                : `${email.toLowerCase().trim()}.ams`;
-
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: amsAuthEmail,
+                        const { data, error } = await supabase.auth.signInWithPassword({
+                email: email.toLowerCase().trim(),
                 password,
             });
 
@@ -122,7 +117,7 @@ export default function AmsLoginPage() {
 
                     {error && (
                         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                            <div className="w-5 h-5 text-red-500 shrink-0 mt-0.5">⚠️</div>
+                            <div className="w-5 h-5 text-red-500 shrink-0 mt-0.5">âš ï¸</div>
                             <p className="text-sm text-red-700 font-medium">{error}</p>
                         </div>
                     )}
@@ -205,3 +200,4 @@ export default function AmsLoginPage() {
         </div>
     );
 }
+

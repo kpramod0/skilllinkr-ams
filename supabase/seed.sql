@@ -34,3 +34,8 @@ INSERT INTO external_users (main_auth_user_id, main_profile_id, verified_email, 
 ('11112222-3333-4444-5555-666677778888', '11112222-3333-4444-5555-666677778888', 'student@kiit.local', '11111111-1111-1111-1111-111111111111', 'student'),
 ('99998888-7777-6666-5555-444433332222', '99998888-7777-6666-5555-444433332222', 'faculty@kiit.local', '11111111-1111-1111-1111-111111111111', 'faculty');
 
+
+  INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at) VALUES 
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","email":"super@ams.local"}', 'email', NOW(), NOW(), NOW()),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '{"sub":"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb","email":"admin@kiit.local"}', 'email', NOW(), NOW(), NOW()),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'cccccccc-cccc-cccc-cccc-cccccccccccc', '{"sub":"cccccccc-cccc-cccc-cccc-cccccccccccc","email":"admin@mit.local"}', 'email', NOW(), NOW(), NOW());

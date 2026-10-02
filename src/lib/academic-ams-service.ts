@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase-admin";
+﻿import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export function normalizeAmsEmail(email: string | null | undefined): string {
   if (!email) return "";
@@ -22,50 +22,53 @@ export function sanitizeCsvCell(value: any): string {
 }
 
 /**
- * Checks AMS administrative access and scope for a given user identity.
+ * Checks AMS administrative access and scope for a given auth user UUID.
  */
-export async function checkAmsAccess(userId: string): Promise<{
+export async function checkAmsAccess(authUserId: string): Promise<{
   isSuperAdmin: boolean;
   isAdmin: boolean;
   domain: string | null;
+  institutionId: string | null;
+  institutionName: string | null;
   status: string;
 }> {
-  if (!userId) {
-    return { isSuperAdmin: false, isAdmin: false, domain: null, status: "unauthenticated" };
+  if (!authUserId) {
+    return { isSuperAdmin: false, isAdmin: false, domain: null, institutionId: null, institutionName: null, status: "unauthenticated" };
   }
 
-  const email = normalizeAmsEmail(userId);
-
-  // 1. Check Super Admin
+  // 1. Check Super Admin (keyed by auth_user_id UUID)
   const { data: superAdmin } = await supabaseAdmin
-    .from("academic_super_admins")
+    .from("academic_super_admin_profiles")
     .select("status")
-    .eq("user_id", email)
+    .eq("auth_user_id", authUserId)
     .eq("status", "active")
     .maybeSingle();
 
   if (superAdmin) {
-    return { isSuperAdmin: true, isAdmin: true, domain: "*", status: "active" };
+    return { isSuperAdmin: true, isAdmin: true, domain: "*", institutionId: null, institutionName: "All Institutions", status: "active" };
   }
 
-  // 2. Check Academic Admin
+  // 2. Check Academic Admin (keyed by auth_user_id UUID), join institution name
   const { data: adminRow } = await supabaseAdmin
-    .from("academic_admins")
-    .select("university_domain, status")
-    .eq("user_id", email)
+    .from("academic_admin_assignments")
+    .select("institution_id, status, institution:institutions(id, name, code)")
+    .eq("auth_user_id", authUserId)
     .in("status", ["active", "pending_onboarding"])
     .maybeSingle();
 
   if (adminRow) {
+    const inst = adminRow.institution as any;
     return {
       isSuperAdmin: false,
       isAdmin: adminRow.status === "active",
-      domain: adminRow.university_domain,
+      domain: inst?.code ?? adminRow.institution_id,
+      institutionId: adminRow.institution_id,
+      institutionName: inst?.name ?? adminRow.institution_id,
       status: adminRow.status,
     };
   }
 
-  return { isSuperAdmin: false, isAdmin: false, domain: null, status: "denied" };
+  return { isSuperAdmin: false, isAdmin: false, domain: null, institutionId: null, institutionName: null, status: "denied" };
 }
 
 /**
@@ -384,3 +387,5 @@ export function filterEvaluationForStudent(evaluation: any, studentId: string) {
     // Exclude internal notes completely!
   };
 }
+
+

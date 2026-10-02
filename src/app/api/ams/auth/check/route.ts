@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { checkAmsAccess } from "@/lib/academic-ams-service";
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
     }
 
-    const access = await checkAmsAccess(user.email);
+    const access = await checkAmsAccess(user.id);
 
     if (!access.isAdmin && !access.isSuperAdmin && access.status !== 'pending_onboarding') {
       return NextResponse.json(
@@ -37,3 +37,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: err.message || "Failed to verify AMS access" }, { status: 500 });
   }
 }
+

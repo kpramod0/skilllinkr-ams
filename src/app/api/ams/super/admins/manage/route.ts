@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAmsAccess } from "@/lib/academic-ams-service";
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const access = await checkAmsAccess(user.email);
+    const access = await checkAmsAccess(user.id);
     if (!access.isSuperAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -102,3 +102,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: err.message || "Failed to manage administrator" }, { status: 500 });
   }
 }
+

@@ -1,0 +1,159 @@
+
+@layer base {
+  :root {
+    /* Light Mode Tokens */
+    --auth-page: #EDF4F8;
+    --auth-shell: #F7FBFD;
+    --auth-left-deep: #EAF5F8;
+    --auth-panel: #FFFFFF;
+    --auth-field: #F7F9FC;
+    --auth-border: #D9E5EE;
+    --auth-border-strong: #9CDDEC;
+    --text-primary: #0F172A;
+    --text-secondary: #526277;
+    --text-muted: #738296;
+    --emerald: #16B987;
+    --cyan: #159DD5;
+    --accent-gradient: linear-gradient(135deg, #21D2A0 0%, #31B8F1 100%);
+  }
+
+  .dark {
+    /* Dark Mode Tokens */
+    --auth-page: #01040D;
+    --auth-shell: #06111E;
+    --auth-left-deep: #04101D;
+    --auth-panel: #0C1726;
+    --auth-field: #091321;
+    --auth-border: rgba(148, 163, 184, 0.20);
+    --auth-border-strong: rgba(67, 217, 241, 0.32);
+    --text-primary: #F8FAFC;
+    --text-secondary: #A8B5C7;
+    --text-muted: #6F8096;
+    --emerald: #20D7A1;
+    --cyan: #35B9F3;
+    --accent-gradient: linear-gradient(135deg, #20D7A1 0%, #35B9F3 100%);
+  }
+}
+
+/* Auth Canvas Utilities */
+
+.auth-canvas-bg {
+  background-color: var(--auth-page);
+}
+
+.auth-shell {
+  background-color: var(--auth-shell);
+}
+
+.auth-left-area {
+  background-color: var(--auth-left-deep);
+}
+
+.auth-panel {
+  background-color: var(--auth-panel);
+}
+
+.auth-input {
+  background-color: var(--auth-field);
+  border-color: var(--auth-border);
+  color: var(--text-primary);
+}
+
+.auth-input:focus {
+  border-color: var(--auth-border-strong);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--auth-border-strong);
+}
+
+.auth-btn-primary {
+  background: var(--accent-gradient);
+  color: #01040D; /* Strong contrast on dark/light gradient */
+  border: none;
+}
+
+.dark .auth-btn-primary {
+  color: #01040D; 
+}
+
+.auth-text-primary {
+  color: var(--text-primary);
+}
+
+.auth-text-secondary {
+  color: var(--text-secondary);
+}
+
+.auth-text-muted {
+  color: var(--text-muted);
+}
+
+/* Animations */
+@keyframes slowDrift {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+.animate-grid-drift {
+  animation: slowDrift 24s linear infinite;
+}
+
+@keyframes floatCard1 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float-1 {
+  animation: floatCard1 7s ease-in-out infinite;
+}
+
+@keyframes floatCard2 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-float-2 {
+  animation: floatCard2 8s ease-in-out infinite 1s; /* delayed */
+}
+
+@keyframes drawLine {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-draw-line {
+  stroke-dasharray: 10 5;
+  stroke-dashoffset: 1000;
+  animation: drawLine 1.2s ease-out forwards;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { filter: drop-shadow(0 0 2px var(--cyan)) brightness(1); }
+  50% { filter: drop-shadow(0 0 8px var(--cyan)) brightness(1.5); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 5.5s infinite;
+}
+
+@keyframes nodePulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 10px var(--cyan); }
+}
+
+.animate-node-pulse {
+  animation: nodePulse 3s ease-in-out infinite;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-grid-drift,
+  .animate-float-1,
+  .animate-float-2,
+  .animate-draw-line,
+  .animate-pulse-glow,
+  .animate-node-pulse {
+    animation: none !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}

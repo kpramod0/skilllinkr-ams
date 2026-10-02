@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { checkAmsAccess, enforceAmsMfa } from "@/lib/academic-ams-service";
 import { supabaseAdmin } from "@/lib/supabase-admin";
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.email) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 
-    const access = await checkAmsAccess(user.email);
+    const access = await checkAmsAccess(user.id);
     if (!access.isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
     const page = Math.max(1, parseInt(request.nextUrl.searchParams.get('page') || '1'));
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     // MFA STEP-UP: Ensure AAL2 for AMS administrative actions
     await enforceAmsMfa(supabase);
 
-    const access = await checkAmsAccess(user.email);
+    const access = await checkAmsAccess(user.id);
     if (!access.isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
     const body = await request.json();
@@ -170,3 +170,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+

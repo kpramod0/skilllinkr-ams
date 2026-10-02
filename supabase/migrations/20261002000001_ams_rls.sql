@@ -89,3 +89,9 @@ CREATE POLICY "Academic Admins see own institution" ON institutions FOR SELECT U
 CREATE POLICY "Academic Admins see own external users" ON external_users FOR SELECT USING (institution_id = public.get_admin_institution_id());
 CREATE POLICY "Academic Admins manage own cycles" ON academic_cycles FOR ALL USING (institution_id = public.get_admin_institution_id());
 CREATE POLICY "Academic Admins manage own projects" ON academic_projects FOR ALL USING (institution_id = public.get_admin_institution_id());
+
+-- Academic Admins can read their own assignment row (SELECT only)
+CREATE POLICY "Academic Admins read own assignment"
+  ON academic_admin_assignments
+  FOR SELECT
+  USING (auth_user_id = auth.uid());

@@ -1,6 +1,6 @@
-import { supabase } from './supabase';
+
 import { supabaseAdmin } from './supabase-admin';
-import { UserProfile } from '@/types';
+export type UserProfile = any;
 
 import crypto from 'crypto';
 
@@ -281,7 +281,7 @@ export function profileToRow(profile: UserProfile) {
         swap_preferences: profile.swapPreferences || { swapModeEnabled: false, requests: [] },
 
         // Portfolio
-        portfolio: (profile.portfolio || []).map(p => ({
+        portfolio: (profile.portfolio || []).map((p: any) => ({
             projectTitle: p.projectTitle || '',
             projectDescription: p.projectDescription || null,
             projectLink: p.projectLink || null,

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { verifyMainServiceAssertion, resolveExternalActor } from '@/lib/auth/service-verifier';
 
 export async function GET(req: NextRequest) {
@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
         
     } catch (error: any) {
         console.error('Context Endpoint Error:', error.message);
-        return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
+        return NextResponse.json({ error: error.message }, { status: 401 });
     }
 }
+

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { checkAmsAccess, sanitizeCsvCell, enforceAmsMfa } from "@/lib/academic-ams-service";
 import { supabaseAdmin } from "@/lib/supabase-admin";
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     // MFA STEP-UP: Ensure AAL2 for AMS administrative actions
     await enforceAmsMfa(supabase);
 
-    const access = await checkAmsAccess(user.email);
+    const access = await checkAmsAccess(user.id);
     if (!access.isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
@@ -122,3 +122,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: err.message || "Failed to generate export" }, { status: 500 });
   }
 }
+
