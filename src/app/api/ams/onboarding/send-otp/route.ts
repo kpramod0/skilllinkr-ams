@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
     await otps.setReset(realEmail, otp);
 
     // 3. SEND OTP via Brevo
-    const apiKey = process.env.BREVO_SMTP_PASS;
-    const smtpUser = process.env.BREVO_SMTP_USER;
+    const apiKey = process.env.BREVO_API_KEY || process.env.BREVO_SMTP_PASS;
+    const smtpUser = process.env.BREVO_SENDER_EMAIL || process.env.BREVO_SMTP_USER || "no-reply@skilllinkr.com";
 
     if (!apiKey || !smtpUser) {
       console.log(`[LOCAL DEV MODE] No Brevo config found. Verification code for ${realEmail} is: ${otp}`);
