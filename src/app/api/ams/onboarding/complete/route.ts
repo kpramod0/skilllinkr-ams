@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { newPassword, otp } = body;
+    const { newPassword, otp, name, position, contactNo } = body;
 
     if (!otp || typeof otp !== 'string' || otp.trim() === '') {
       return NextResponse.json({ error: "Verification code is required" }, { status: 400 });
@@ -59,7 +59,13 @@ export async function POST(request: NextRequest) {
     // 4. Mark as active in academic_admins
     const { error: adminErr } = await supabaseAdmin
       .from("academic_admin_assignments")
-      .update({ status: "active", updated_at: new Date().toISOString() })
+      .update({ 
+        status: "active", 
+        name: name || adminRow.name,
+        position: position || adminRow.position,
+        contact_no: contactNo || adminRow.contact_no,
+        updated_at: new Date().toISOString() 
+      })
       .eq("id", adminRow.id);
 
     if (adminErr) throw adminErr;
