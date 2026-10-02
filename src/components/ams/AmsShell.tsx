@@ -118,10 +118,18 @@ export function AmsShell({ access, user, activeTab, setActiveTab, children }: Am
             {access.isSuperAdmin ? "Global Access" : access.institutionName || access.domain || "Unknown Institution"}
           </p>
         </div>
-        <Link href="/main/academic" className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-white" style={{ color: '#6b6b80' }}>
-          <ArrowLeft className="w-4 h-4" />
-          Main Portal
-        </Link>
+        <button onClick={async () => {
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            window.location.href = "/ams/login";
+          }} className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-red-50" style={{ color: '#ef4444' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Log Out
+          </button>
+          <Link href="/main/academic" className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-white mt-1" style={{ color: '#6b6b80' }}>
+            <ArrowLeft className="w-4 h-4" />
+            Main Portal
+          </Link>
       </div>
     </div>
   );
