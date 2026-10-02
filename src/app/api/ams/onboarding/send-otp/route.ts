@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey || !smtpUser) {
       console.log(`[LOCAL DEV MODE] No Brevo config found. Verification code for ${realEmail} is: ${otp}`);
-      return NextResponse.json({ success: true, message: 'Local Dev Mode: Verification code generated. Check server logs.' });
+      return NextResponse.json({ success: true, message: 'Local Dev Mode: Verification code generated. Check server logs.', devOtp: otp });
     }
 
     const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
