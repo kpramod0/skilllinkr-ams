@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { 
@@ -255,8 +255,8 @@ export default function AmsDashboardPage() {
             Your account <span className="text-[#10b981] font-semibold">{user?.email || "Unknown"}</span> lacks administrative privileges.
           </p>
           <div className="text-left bg-[#f7f7f9] border border-[#d4d4dc] rounded-xl p-4 mb-6">
-            <p className="text-xs text-[#6b6b80] mb-1">â€¢ Your student/faculty session is active.</p>
-            <p className="text-xs text-[#6b6b80]">â€¢ Please contact your university to request an admin invitation.</p>
+            <p className="text-xs text-[#6b6b80] mb-1">• Your student/faculty session is active.</p>
+            <p className="text-xs text-[#6b6b80]">• Please contact your university to request an admin invitation.</p>
           </div>
           <Link href="/main/academic" className="inline-flex items-center justify-center w-full px-6 py-3 bg-[#10b981] hover:bg-teal-700 text-[#ffffff] font-medium rounded-xl text-sm transition-colors shadow-sm">
             Return to Main Portal
@@ -437,7 +437,7 @@ export default function AmsDashboardPage() {
                   <span className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Eligible Students</span>
                   <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><Users className="w-4 h-4" /></div>
                 </div>
-                <p className="text-3xl font-bold text-[#1a1a2e]">{adminMetrics?.eligibleStudents ?? "—"}</p>
+                <p className="text-3xl font-bold text-[#1a1a2e]">{adminMetrics?.eligibleStudents ?? "�"}</p>
                 <p className="text-xs text-[#6b6b80] font-medium mt-2">Active in current cycle</p>
               </div>
 
@@ -455,7 +455,7 @@ export default function AmsDashboardPage() {
                   <span className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Allocated Projects</span>
                   <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Briefcase className="w-4 h-4" /></div>
                 </div>
-                <p className="text-3xl font-bold text-[#1a1a2e]">{adminMetrics?.allocatedProjects ?? "—"}</p>
+                <p className="text-3xl font-bold text-[#1a1a2e]">{adminMetrics?.allocatedProjects ?? "�"}</p>
                 <p className="text-xs text-emerald-600 font-medium mt-2 flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Active Assignments</p>
               </div>
             </div>
@@ -520,7 +520,7 @@ export default function AmsDashboardPage() {
                         <span>Target: <span className="text-[#1a1a2e]">{req.target_student_id}</span></span>
                         {req.replacement_student_id && (
                           <>
-                            <span className="text-slate-300">â†’</span>
+                            <span className="text-slate-300">→</span>
                             <span>Replacement: <span className="text-[#1a1a2e]">{req.replacement_student_id}</span></span>
                           </>
                         )}
@@ -718,7 +718,7 @@ export default function AmsDashboardPage() {
                               <p className="text-sm font-bold text-[#1a1a2e]">{a.admin_name || a.user_id}</p>
                               <div className="flex items-center gap-2 text-xs font-mono text-[#6b6b80] mt-0.5">
                                 <span>{a.user_id}</span>
-                                <span className="text-slate-300">â€¢</span>
+                                <span className="text-slate-300">•</span>
                                 <span>{a.university_name || a.university_domain}</span>
                               </div>
                               {(a.admin_position || a.contact_no) && (
@@ -892,14 +892,14 @@ export default function AmsDashboardPage() {
               ) : (
                 <div className="divide-y divide-slate-100">
                   {institutions.map((inst: any) => (
-                    <div key={inst.domain} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#f7f7f9] transition-colors">
+                    <div key={inst.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#f7f7f9] transition-colors">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
                           <Building2 className="w-6 h-6" />
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-[#1a1a2e] font-mono">{inst.domain}</p>
-                          <p className="text-xs text-[#6b6b80]">First activity: {new Date(inst.firstSeen).toLocaleDateString()}</p>
+                          <p className="text-lg font-bold text-[#1a1a2e] font-mono">{inst.name} <span className="text-sm font-normal text-slate-500">({inst.code})</span></p>
+                          <p className="text-xs text-[#6b6b80]">First activity: {inst.created_at ? new Date(inst.created_at).toLocaleDateString() : 'N/A'}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-6 text-sm">
@@ -1003,6 +1003,7 @@ export default function AmsDashboardPage() {
     </AmsShell>
   );
 }
+
 
 
 
