@@ -702,13 +702,13 @@ export default function AmsDashboardPage() {
                 <div className="bg-[#ffffff] border border-[#d4d4dc] rounded-2xl overflow-hidden shadow-sm">
                   <div className="p-4 border-b border-[#d4d4dc] bg-[#f7f7f9]/50 flex justify-between items-center">
                     <h3 className="font-bold text-[#1a1a2e]">Active Administrators</h3>
-                    <span className="px-2 py-1 bg-[#e4e4e8] text-[#1a1a2e] text-xs font-bold rounded-lg">{adminsData.admins.length} Total</span>
+                    <span className="px-2 py-1 bg-[#e4e4e8] text-[#1a1a2e] text-xs font-bold rounded-lg">{adminsData.admins.filter((a: any) => a.status !== "pending_onboarding").length} Total</span>
                   </div>
-                  {adminsData.admins.length === 0 ? (
+                  {adminsData.admins.filter((a: any) => a.status !== "pending_onboarding").length === 0 ? (
                     <div className="p-8 text-center text-[#6b6b80] text-sm">No administrators found.</div>
                   ) : (
                     <div className="divide-y divide-slate-100">
-                      {adminsData.admins.map((a: any) => (
+                      {adminsData.admins.filter((a: any) => a.status !== "pending_onboarding").map((a: any) => (
                         <div key={a.id} className="p-4 flex items-center justify-between hover:bg-[#f7f7f9] transition-colors">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
