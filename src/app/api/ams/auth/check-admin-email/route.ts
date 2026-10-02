@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { checkAmsAccess } from "@/lib/academic-ams-service";
+﻿import { NextRequest, NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,9 +11,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if the user is an active administrator in AMS
-    const access = await checkAmsAccess(email);
+    const { data: adminRow } = await supabaseAdmin
+      .from("academic_admin_assignments")
+      .select("status")
+      .eq("email", email)
+      .maybeSingle();
 
-    if (!access.isAdmin && !access.isSuperAdmin) {
+    const { data: superAdmin } = await supabaseAdmin
+      .from("academic_super_admin_profiles")
+      .select("status")
+      .eq("email", email)
+      .maybeSingle();
+
+    const isValidAdmin = (adminRow && adminRow.status === "active") || (superAdmin && superAdmin.status === "active");
+
+    if (!isValidAdmin) {
       return NextResponse.json(
         { 
           isAuthorized: false,
