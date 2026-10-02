@@ -101,6 +101,8 @@ export async function POST(request: NextRequest) {
         institution_id: institutionId,
         email,
         name: name || email.split("@")[0],
+        position: position || null,
+        contact_no: contactNo || null,
         status: "pending_onboarding",
       }, { onConflict: "auth_user_id,institution_id" })
       .select()
