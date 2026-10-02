@@ -180,15 +180,15 @@ export default function AmsOnboardingPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider flex items-center gap-2"><User className="w-4 h-4"/> Full Name</label>
-                  <input type="text" value={updateName} onChange={e => setUpdateName(e.target.value)} required className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none" />
+                  <input type="text" value={updateName} onChange={e => setUpdateName(e.target.value)} required className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm text-[#1a1a2e] font-medium focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider flex items-center gap-2"><Briefcase className="w-4 h-4"/> Position</label>
-                  <input type="text" value={updatePosition} onChange={e => setUpdatePosition(e.target.value)} required className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none" />
+                  <input type="text" value={updatePosition} onChange={e => setUpdatePosition(e.target.value)} required className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm text-[#1a1a2e] font-medium focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider flex items-center gap-2"><Phone className="w-4 h-4"/> Contact No</label>
-                  <input type="text" value={updateContactNo} onChange={e => setUpdateContactNo(e.target.value)} className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none" />
+                  <input type="text" value={updateContactNo} onChange={e => setUpdateContactNo(e.target.value)} className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm text-[#1a1a2e] font-medium focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider flex items-center gap-2"><Building className="w-4 h-4"/> Institution (Fixed)</label>
