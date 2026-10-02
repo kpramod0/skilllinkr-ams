@@ -712,7 +712,7 @@ export default function AmsDashboardPage() {
                         <div key={a.id} className="p-4 flex items-center justify-between hover:bg-[#f7f7f9] transition-colors">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
-                              {(a.name || a.email || "A").charAt(0).toUpperCase()}
+                              {String(a?.name || a?.email || "A")[0].toUpperCase()}
                             </div>
                             <div>
                               <p className="text-sm font-bold text-[#1a1a2e]">{a.name || a.email}</p>
