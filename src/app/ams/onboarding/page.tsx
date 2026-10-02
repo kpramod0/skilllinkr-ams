@@ -16,6 +16,9 @@ export default function AmsOnboardingPage() {
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [otpSent, setOtpSent] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [updateName, setUpdateName] = useState("");
+  const [updatePosition, setUpdatePosition] = useState("");
+  const [updateContactNo, setUpdateContactNo] = useState("");
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -31,6 +34,9 @@ export default function AmsOnboardingPage() {
       if (res.ok && data.status === "pending_onboarding") {
         setUser(data.user);
         setAdminData(data.adminData);
+        setUpdateName(data.adminData.name || "");
+        setUpdatePosition(data.adminData.position || "");
+        setUpdateContactNo(data.adminData.contact_no || "");
           
           // Auto-trigger OTP sending if not already sent
           if (!otpSent && !isSendingOtp) {
@@ -99,7 +105,7 @@ export default function AmsOnboardingPage() {
       const res = await fetch("/api/ams/onboarding/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newPassword, otp: finalOtp }),
+        body: JSON.stringify({ newPassword, otp: finalOtp, name: updateName, position: updatePosition, contactNo: updateContactNo }),
       });
       const data = await res.json();
 
@@ -172,33 +178,21 @@ export default function AmsOnboardingPage() {
               <p className="text-sm text-[#6b6b80] mb-4">This information was provisioned by your Super Administrator.</p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 bg-[#f7f7f9] border border-[#d4d4dc] rounded-xl flex items-center gap-3">
-                  <User className="w-5 h-5 text-[#6b6b80]" />
-                  <div>
-                    <p className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Full Name</p>
-                    <p className="font-medium text-[#1a1a2e]">{adminData?.admin_name || "N/A"}</p>
-                  </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider flex items-center gap-2"><User className="w-4 h-4"/> Full Name</label>
+                  <input type="text" value={updateName} onChange={e => setUpdateName(e.target.value)} required className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none" />
                 </div>
-                <div className="p-4 bg-[#f7f7f9] border border-[#d4d4dc] rounded-xl flex items-center gap-3">
-                  <Building className="w-5 h-5 text-[#6b6b80]" />
-                  <div>
-                    <p className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Institution</p>
-                    <p className="font-medium text-[#1a1a2e]">{adminData?.university_name || adminData?.university_domain}</p>
-                  </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider flex items-center gap-2"><Briefcase className="w-4 h-4"/> Position</label>
+                  <input type="text" value={updatePosition} onChange={e => setUpdatePosition(e.target.value)} required className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none" />
                 </div>
-                <div className="p-4 bg-[#f7f7f9] border border-[#d4d4dc] rounded-xl flex items-center gap-3">
-                  <Briefcase className="w-5 h-5 text-[#6b6b80]" />
-                  <div>
-                    <p className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Position</p>
-                    <p className="font-medium text-[#1a1a2e]">{adminData?.admin_position || "N/A"}</p>
-                  </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider flex items-center gap-2"><Phone className="w-4 h-4"/> Contact No</label>
+                  <input type="text" value={updateContactNo} onChange={e => setUpdateContactNo(e.target.value)} className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none" />
                 </div>
-                <div className="p-4 bg-[#f7f7f9] border border-[#d4d4dc] rounded-xl flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-[#6b6b80]" />
-                  <div>
-                    <p className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Contact No</p>
-                    <p className="font-medium text-[#1a1a2e]">{adminData?.contact_no || "N/A"}</p>
-                  </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider flex items-center gap-2"><Building className="w-4 h-4"/> Institution (Fixed)</label>
+                  <input type="text" value="Assigned by Super Admin" disabled className="w-full bg-[#f7f7f9] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm text-[#6b6b80] cursor-not-allowed outline-none" />
                 </div>
               </div>
             </div>
