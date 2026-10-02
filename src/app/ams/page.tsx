@@ -156,7 +156,7 @@ export default function AmsDashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           targetEmail: inviteEmail, 
-          universityDomain: inviteDomain,
+          institutionId: inviteDomain,
           tempPassword,
           name: inviteName,
           position: invitePosition,
