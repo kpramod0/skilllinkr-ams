@@ -2,6 +2,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { otps } from "@/lib/db-helpers";
+import nodemailer from "nodemailer";
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,18 +43,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Local Dev Mode: Verification code generated. Check server logs.', devOtp: otp });
     }
 
-    const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'api-key': apiKey,
-        'content-type': 'application/json'
+    const transporter = nodemailer.createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: smtpUser, // e.g. a46a18001@smtp-brevo.com
+        pass: apiKey, // The xsmtpsib-... password
       },
-      body: JSON.stringify({
-        sender: { name: 'SkillLinkr', email: smtpUser },
-        to: [{ email: realEmail }],
-        subject: 'SkillLinkr - Admin Onboarding Verification Code',
-        htmlContent: `
+    });
+
+    const info = await transporter.sendMail({
+      from: `"SkillLinkr" <${smtpUser}>`,
+      to: realEmail,
+      subject: "SkillLinkr - Admin Onboarding Verification Code",
+      html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px;">
               <h2 style="color: #10b981; text-align: center;">Verify Your Administrator Account</h2>
               <p style="font-size: 16px; color: #333;">Please use the following verification code to complete your AMS onboarding and set your new password:</p>
@@ -65,12 +69,10 @@ export async function POST(request: NextRequest) {
               <p style="font-size: 16px; color: #10b981; text-align: center; font-weight: bold; margin-bottom: 5px;">Welcome to the Academic Management System! 🎓</p>
           </div>
         `
-      })
     });
-
-    if (!brevoRes.ok) {
-      const errorData = await brevoRes.json();
-      throw new Error(`Email API failed: ${errorData.message || brevoRes.statusText}`);
+    
+    if (!info.messageId) {
+      throw new Error("Failed to send email via SMTP");
     }
 
     return NextResponse.json({ success: true, message: 'Verification code sent to your email.' });
