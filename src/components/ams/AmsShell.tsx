@@ -6,6 +6,7 @@ import {
   Building2, UserCog, History, LogOut, ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 
 export type AmsTab = 
   | "dashboard" | "institutions" | "admins" | "cycles" | "projects" 
