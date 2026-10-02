@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { otps } from "@/lib/db-helpers";
@@ -28,9 +28,9 @@ export async function POST(request: NextRequest) {
 
     // 1. Verify they are currently pending onboarding
     const { data: adminRow } = await supabaseAdmin
-      .from("academic_admins")
+      .from("academic_admin_assignments")
       .select("id")
-      .eq("user_id", realEmail)
+      .eq("email", realEmail)
       .eq("status", "pending_onboarding")
       .maybeSingle();
 
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // 4. Mark as active in academic_admins
     const { error: adminErr } = await supabaseAdmin
-      .from("academic_admins")
+      .from("academic_admin_assignments")
       .update({ status: "active", updated_at: new Date().toISOString() })
       .eq("id", adminRow.id);
 
