@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
         institution_id: institutionId,
         email,
         name: name || email.split("@")[0],
-        status: "active",
+        status: "pending_onboarding",
       }, { onConflict: "auth_user_id,institution_id" })
       .select()
       .single();
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     await supabaseAdmin.from("academic_admin_invitations").insert({
       institution_id: institutionId,
       email,
-      status: "accepted",
+      status: "pending",
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     });
 
