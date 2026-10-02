@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
     const smtpUser = process.env.BREVO_SMTP_USER;
 
     if (!apiKey || !smtpUser) {
-      console.error('CRITICAL: Brevo config missing');
-      return NextResponse.json({ error: 'Email configuration error' }, { status: 500 });
+      console.log(`[LOCAL DEV MODE] No Brevo config found. Verification code for ${realEmail} is: ${otp}`);
+      return NextResponse.json({ success: true, message: 'Local Dev Mode: Verification code generated. Check server logs.' });
     }
 
     const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
