@@ -1,0 +1,233 @@
+@import "tailwindcss";
+@import "./auth.css";
+
+/* Enable class-based dark mode for Tailwind dark: prefix */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ================================================
+   LIGHT MODE (default)
+   Clean, professional, warm palette
+   ================================================ */
+:root {
+  --background: #f0f0f3;
+  --foreground: #1a1a2e;
+  --primary: #10b981;
+  --primary-foreground: #ffffff;
+  --muted: #e4e4e8;
+  --muted-foreground: #6b6b80;
+  --border: #d4d4dc;
+  --input: #e4e4e8;
+  --ring: #10b981;
+  --card: #f7f7f9;
+  --card-foreground: #1a1a2e;
+}
+
+/* ================================================
+   DARK MODE (original colors — restored exactly)
+   ================================================ */
+.dark {
+  --background: #09090b;
+  --foreground: #ededed;
+  --primary: #10b981;
+  --primary-foreground: #ffffff;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #059669;
+  --card: #18181b;
+  --card-foreground: #ededed;
+}
+
+/* Tailwind theme tokens (dynamic via CSS vars) */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --animate-marquee: marquee 25s linear infinite;
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+}
+
+/* ================================================
+   BASE STYLES
+   ================================================ */
+
+/* ── Mobile viewport fix ──────────────────────────
+   On mobile browsers (iOS Safari, Chrome Android),
+   100vh includes the browser address bar, pushing
+   the bottom nav off-screen.
+   Fix: set html/body to the available height, then
+   override layout containers with 100dvh (dynamic
+   viewport height) which is always the visible area.
+   ─────────────────────────────────────────────── */
+html {
+  height: -webkit-fill-available; /* iOS Safari fallback */
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  /* Removed overflow: hidden to allow the landing page to scroll naturally */
+}
+
+::selection {
+  background-color: rgb(16 185 129 / 0.3);
+}
+
+/* ================================================
+   GLASSMORPHISM
+   ================================================ */
+
+/* Dark mode glass — original look */
+.dark .glass {
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Light mode glass — clean frosted look */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+/* ================================================
+   ONBOARDING THEME
+   Unified layout for onboarding pages
+   ================================================ */
+.onboarding-theme {
+    --page-background: #F3F8FB;
+    --page-grid-line: rgba(39, 126, 164, 0.055);
+    --surface: #FFFFFF;
+    --surface-border: #D8E5EC;
+    --input-background: #F7FAFC;
+    --input-border: #D6E2EA;
+    --text-primary: #0F172A;
+    --text-secondary: #526277;
+    --text-muted: #718096;
+    --emerald: #16B987;
+    --cyan: #159DD5;
+    --accent-gradient: linear-gradient(135deg, #21D2A0 0%, #31B8F1 100%);
+}
+
+.dark .onboarding-theme {
+    --page-background: #06111E;
+    --page-grid-line: rgba(82, 150, 185, 0.055);
+    --surface: #0C1726;
+    --surface-border: rgba(148, 163, 184, 0.20);
+    --input-background: #091321;
+    --input-border: rgba(148, 163, 184, 0.22);
+    --text-primary: #F8FAFC;
+    --text-secondary: #A8B5C7;
+    --text-muted: #718096;
+    --emerald: #20D7A1;
+    --cyan: #35B9F3;
+    --accent-gradient: linear-gradient(135deg, #20D7A1 0%, #35B9F3 100%);
+}
+
+/* ================================================
+   CUSTOM SCROLLBARS (Reddit-style hover sidebar & clean modern scrollbars)
+   ================================================ */
+
+/* Sidebar auto-hide scrollbar (only visible when mouse hovers over navigation area) */
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.sidebar-scrollbar:hover,
+.sidebar-scrollbar:focus-within {
+  scrollbar-color: rgba(156, 163, 175, 0.35) transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar-scrollbar:hover::-webkit-scrollbar-thumb,
+.sidebar-scrollbar:focus-within::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.35);
+}
+
+.sidebar-scrollbar:hover::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.6);
+}
+
+/* General clean custom scrollbar (replaces default Windows arrows and clunky bar) */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.35) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.35);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.6);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+

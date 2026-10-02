@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /main
+Disallow: /messages
+Disallow: /settings
+Disallow: /private
+Disallow: /api/
+
+Sitemap: https://www.skilllinkr.com/sitemap.xml

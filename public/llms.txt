@@ -1,0 +1,23 @@
+# SkillLinkr
+
+SkillLinkr is a student collaboration platform designed to help college students find teammates for projects, hackathons, startups, and research.
+
+## Features
+- Smart Discover: Find students by skills, domain, college, and academic year.
+- Team Formation: Build balanced teams for hackathons and academic projects.
+- Room/Section Swap: Mutually match with other students to swap hostel rooms or academic sections.
+
+## Technologies Used
+- Next.js App Router
+- React
+- Tailwind CSS
+
+## Website Sections
+- Homepage: https://www.skilllinkr.com
+- Blog: https://www.skilllinkr.com/blog
+- Features: https://www.skilllinkr.com/features/smart-discover
+- Explore Domains: https://www.skilllinkr.com/domains/artificial-intelligence
+- Explore Skills: https://www.skilllinkr.com/skills/react
+
+## Mission
+To be the ultimate network for actionable student collaboration across universities.

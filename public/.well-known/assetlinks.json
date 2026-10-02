@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.skilllinkr.app",
+      "sha256_cert_fingerprints": [
+        "C9:A5:FD:24:83:F8:61:19:13:47:D0:8C:5A:62:87:DA:8C:A4:25:29:63:50:0D:57:43:F2:72:44:67:F2:8D:50"
+      ]
+    }
+  }
+]
