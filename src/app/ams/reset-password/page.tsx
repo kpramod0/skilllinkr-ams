@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -44,8 +44,13 @@ export default function AmsResetPasswordPage() {
                 throw new Error(data.error || "You are not registered. Contact the Authority of SkillLinkr.");
             }
 
-            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email);
-            if (resetError) throw resetError;
+            const sendRes = await fetch("/api/ams/auth/reset-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+            const sendData = await sendRes.json();
+            if (!sendRes.ok) throw new Error(sendData.error || "Failed to send OTP");
             
             setStep(2);
         } catch (err: any) {
@@ -159,7 +164,7 @@ export default function AmsResetPasswordPage() {
 
                             {error && (
                                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                                    <div className="w-5 h-5 text-red-500 shrink-0 mt-0.5">⚠️</div>
+                                    <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                                     <p className="text-sm text-red-700 font-medium">{error}</p>
                                 </div>
                             )}
@@ -201,7 +206,7 @@ export default function AmsResetPasswordPage() {
 
                             {error && (
                                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                                    <div className="w-5 h-5 text-red-500 shrink-0 mt-0.5">⚠️</div>
+                                    <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                                     <p className="text-sm text-red-700 font-medium">{error}</p>
                                 </div>
                             )}
