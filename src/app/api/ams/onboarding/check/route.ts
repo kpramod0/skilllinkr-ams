@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
@@ -12,9 +12,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: adminRow } = await supabaseAdmin
-      .from("academic_admins")
+      .from("academic_admin_assignments")
       .select("*")
-      .eq("user_id", user.email)
+      .eq("email", user.email)
       .eq("status", "pending_onboarding")
       .maybeSingle();
 

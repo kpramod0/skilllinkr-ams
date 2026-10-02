@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { otps } from "@/lib/db-helpers";
@@ -14,9 +14,9 @@ export async function POST(request: NextRequest) {
 
     // Verify they are currently pending onboarding
     const { data: adminRow } = await supabaseAdmin
-      .from("academic_admins")
+      .from("academic_admin_assignments")
       .select("id")
-      .eq("user_id", user.email)
+      .eq("email", user.email)
       .eq("status", "pending_onboarding")
       .maybeSingle();
 
