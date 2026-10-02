@@ -192,7 +192,7 @@ export default function AmsOnboardingPage() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider flex items-center gap-2"><Building className="w-4 h-4"/> Institution (Fixed)</label>
-                  <input type="text" value="Assigned by Super Admin" disabled className="w-full bg-[#f7f7f9] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm text-[#6b6b80] cursor-not-allowed outline-none" />
+                  <input type="text" value={adminData?.institution?.name || "Assigned by Super Admin"} disabled className="w-full bg-[#f7f7f9] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm text-[#6b6b80] cursor-not-allowed outline-none" />
                 </div>
               </div>
             </div>
