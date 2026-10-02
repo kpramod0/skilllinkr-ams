@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // First fetch the admin row
     const { data: adminRow } = await supabaseAdmin
-      .from("academic_admins")
+      .from("academic_admin_assignments")
       .select("*")
       .eq("id", adminId)
       .single();
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     if (action === "suspend") {
       // Temporarily revoke access (prohibits login but keeps history)
       const { error } = await supabaseAdmin
-        .from("academic_admins")
+        .from("academic_admin_assignments")
         .update({ status: "revoked", updated_at: new Date().toISOString() })
         .eq("id", adminId);
       if (error) throw error;
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     else if (action === "restore") {
       // Restore access
       const { error } = await supabaseAdmin
-        .from("academic_admins")
+        .from("academic_admin_assignments")
         .update({ status: "active", updated_at: new Date().toISOString() })
         .eq("id", adminId);
       if (error) throw error;
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       // For now, removing the academic_admins row means they are treated as a completely new admin if added again.
       
       const { error } = await supabaseAdmin
-        .from("academic_admins")
+        .from("academic_admin_assignments")
         .delete()
         .eq("id", adminId);
         
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin
         .from("academic_admin_invitations")
         .delete()
-        .eq("email", adminRow.user_id);
+        .eq("email", adminRow.email);
 
       return NextResponse.json({ success: true, message: "Administrator permanently deleted from AMS." });
     }
