@@ -68,8 +68,15 @@ export default function AmsOnboardingPage() {
       const res = await fetch("/api/ams/onboarding/send-otp", { method: "POST" });
       const data = await res.json();
       if (res.ok) {
-        setOtpSent(true);
-        setMessage({ text: data.message || "Verification code sent!", type: "success" });
+        setMessage({ text: "Onboarding completed successfully!", type: "success" });
+        const { error: signInErr } = await supabase.auth.signInWithPassword({
+          email: adminData?.email || "",
+          password: newPassword,
+        });
+        if (signInErr) console.error("Auto-login failed:", signInErr);
+        setTimeout(() => {
+          window.location.href = "/ams";
+        }, 1500);
       } else {
         setMessage({ text: data.error || "Failed to send code", type: "error" });
       }
@@ -111,8 +118,13 @@ export default function AmsOnboardingPage() {
 
       if (res.ok) {
         setMessage({ text: "Onboarding completed successfully!", type: "success" });
+        const { error: signInErr } = await supabase.auth.signInWithPassword({
+          email: adminData?.email || "",
+          password: newPassword,
+        });
+        if (signInErr) console.error("Auto-login failed:", signInErr);
         setTimeout(() => {
-          router.push("/ams");
+          window.location.href = "/ams";
         }, 1500);
       } else {
         setMessage({ text: data.error || "Failed to complete onboarding", type: "error" });
