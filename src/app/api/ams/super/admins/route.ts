@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { targetEmail, institutionId, tempPassword, name } = body;
+    const { targetEmail, institutionId, tempPassword, name, position, contactNo } = body;
 
     if (!targetEmail || !institutionId) {
       return NextResponse.json({ error: "Email and institution are required" }, { status: 400 });
