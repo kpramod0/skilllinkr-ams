@@ -806,15 +806,16 @@ export default function AmsDashboardPage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Institution Domain</label>
-                      <input 
-                        required
-                        type="text"
-                        value={inviteDomain}
-                        onChange={(e) => setInviteDomain(e.target.value)}
-                        placeholder="e.g. mit.edu"
-                        className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow"
-                      />
+                      <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Institution</label>
+                        <select 
+                          required
+                          value={inviteDomain}
+                          onChange={(e) => setInviteDomain(e.target.value)}
+                          className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow"
+                        >
+                          <option value="" disabled>Select an institution</option>
+                          {institutions.map(i => <option key={i.id} value={i.id}>{i.name} ({i.code})</option>)}
+                        </select>
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Temporary Password</label>
