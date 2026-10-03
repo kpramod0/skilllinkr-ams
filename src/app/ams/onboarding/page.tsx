@@ -3,8 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ShieldCheck, CheckCircle, AlertCircle, Key, User, Building, Briefcase, Phone, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 export default function AmsOnboardingPage() {
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [adminData, setAdminData] = useState<any>(null);

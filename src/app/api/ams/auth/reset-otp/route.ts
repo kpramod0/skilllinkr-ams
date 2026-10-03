@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const senderEmail = process.env.BREVO_SENDER_EMAIL || "no-reply@skilllinkr.com";
 
     if (!apiKey || !smtpAuthUser) {
-      console.log( + "" + [LOCAL DEV MODE] No Brevo config found. Password reset code for  is:  + "" + );
+      console.log(`[LOCAL DEV MODE] No Brevo config found. Password reset code for ${realEmail} is: ${otp}`);
       return NextResponse.json({ success: true, message: 'Local Dev Mode: Verification code generated.' });
     }
 
@@ -45,19 +45,19 @@ export async function POST(request: NextRequest) {
     });
 
     const info = await transporter.sendMail({
-      from: "SkillLinkr" < + "$" + {senderEmail}>,
+      from: `"SkillLinkr" <${senderEmail}>`,
       to: realEmail,
       subject: "SkillLinkr - Password Reset Verification Code",
-      html:  + "" + 
+      html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px;">
               <h2 style="color: #24cdd1; text-align: center;">Reset Your Password</h2>
               <p style="font-size: 16px; color: #333;">Please use the following verification code to reset your SkillLinkr administrator password:</p>
               <div style="background-color: #f7f7f9; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;">
-                  <h1 style="margin: 0; font-size: 32px; letter-spacing: 5px; color: #0f172a;"> + "$" + {otp}</h1>
+                  <h1 style="margin: 0; font-size: 32px; letter-spacing: 5px; color: #0f172a;">${otp}</h1>
               </div>
               <p style="font-size: 14px; color: #666;">This code will expire in 10 minutes.</p>
           </div>
-         + "" + 
+        `
     });
     
     if (!info.messageId) {

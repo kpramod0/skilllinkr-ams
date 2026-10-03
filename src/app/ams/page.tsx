@@ -29,7 +29,17 @@ export default function AmsDashboardPage() {
 
   const [metrics, setMetrics] = useState<{institutions:number, administrators:number, activeCycles:number, projects:number} | null>(null);
   const [adminMetrics, setAdminMetrics] = useState<{eligibleStudents:number, allocatedProjects:number, activeCycles:number} | null>(null);
+  const [searchInstitution, setSearchInstitution] = useState("");
+  const [searchAdmin, setSearchAdmin] = useState("");
   const [institutions, setInstitutions] = useState<any[]>([]);
+  const [academicCycles, setAcademicCycles] = useState<any[]>([]);
+  const [isLoadingCycles, setIsLoadingCycles] = useState(false);
+  const [showCycleModal, setShowCycleModal] = useState(false);
+  const [editingCycle, setEditingCycle] = useState<any | null>(null);
+  
+  // Cycle Form State
+  const [cycleForm, setCycleForm] = useState({ name: "", start_date: "", end_date: "", status: "draft" });
+
   const [adminsData, setAdminsData] = useState<{admins:any[], invitations:any[]}>({admins:[], invitations:[]});
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteDomain, setInviteDomain] = useState("");
@@ -108,6 +118,62 @@ export default function AmsDashboardPage() {
       if (res.ok) setAdminMetrics(await res.json());
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const fetchAcademicCycles = async () => {
+    try {
+      setIsLoadingCycles(true);
+      const res = await fetch("/api/ams/cycles");
+      const data = await res.json();
+      if (res.ok) {
+        setAcademicCycles(data.cycles || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoadingCycles(false);
+    }
+  };
+
+  const handleSaveCycle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/ams/cycles", {
+        method: editingCycle ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingCycle ? { id: editingCycle.id, ...cycleForm } : cycleForm),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage({ text: data.message || "Cycle saved successfully", type: "success" });
+        setShowCycleModal(false);
+        fetchAcademicCycles();
+      } else {
+        setMessage({ text: data.error || "Failed to save cycle", type: "error" });
+      }
+    } catch (err: any) {
+      setMessage({ text: err.message || "Failed to save cycle", type: "error" });
+    }
+  };
+
+  const handleDeleteCycle = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this cycle?")) return;
+    try {
+      const res = await fetch("/api/ams/cycles", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage({ text: data.message || "Cycle deleted successfully", type: "success" });
+        fetchAcademicCycles();
+      } else {
+        setMessage({ text: data.error || "Failed to delete cycle", type: "error" });
+      }
+    } catch (err: any) {
+      setMessage({ text: err.message || "Failed to delete cycle", type: "error" });
     }
   };
 
@@ -300,6 +366,18 @@ export default function AmsDashboardPage() {
       </div>
     );
   };
+
+  const filteredInstitutions = institutions.filter((inst: any) => 
+    inst.name?.toLowerCase().includes(searchInstitution.toLowerCase()) || 
+    inst.code?.toLowerCase().includes(searchInstitution.toLowerCase())
+  );
+
+  const activeAdmins = adminsData.admins.filter((a: any) => a.status !== "pending_onboarding");
+  const filteredAdmins = activeAdmins.filter((a: any) => 
+    a.name?.toLowerCase().includes(searchAdmin.toLowerCase()) || 
+    a.institution?.name?.toLowerCase().includes(searchAdmin.toLowerCase()) ||
+    a.email?.toLowerCase().includes(searchAdmin.toLowerCase())
+  );
 
   return (
     <AmsShell 
@@ -562,413 +640,62 @@ export default function AmsDashboardPage() {
                                     CYCLES (ELIGIBILITY IMPORT) 
         ========================================================================= */}
         {activeTab === "cycles" && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Academic Cycles & Eligibility</h2>
-                <p className="text-sm text-[#6b6b80] mt-1">Upload bulk eligibility data securely using template files.</p>
-              </div>
-              <div className="flex bg-[#e4e4e8] p-1 rounded-xl border border-[#d4d4dc]">
-                 <button onClick={() => setImportMode("student")} className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${importMode === "student" ? "bg-[#ffffff] text-[#10b981] shadow-sm" : "text-[#6b6b80] hover:text-[#1a1a2e]"}`}>
-                   Import Students
-                 </button>
-                 <button onClick={() => setImportMode("faculty")} className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${importMode === "faculty" ? "bg-[#ffffff] text-[#10b981] shadow-sm" : "text-[#6b6b80] hover:text-[#1a1a2e]"}`}>
-                   Import Faculty
-                 </button>
-              </div>
-            </div>
-
-            <div className="bg-[#ffffff] border border-[#d4d4dc] rounded-2xl shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-[#d4d4dc] bg-[#f7f7f9]/50">
-                <h3 className="font-bold text-[#1a1a2e]">Upload Data</h3>
-              </div>
-              <div className="p-6 md:p-8">
-                <div className="mb-8 p-4 bg-[#ecfdf5] border border-teal-100 rounded-xl flex items-start gap-3 text-sm">
-                  <CheckCircle className="w-5 h-5 text-[#10b981] shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-[#10b981] mb-1">Supported File Formats</h4>
-                    <p className="text-[#10b981] mb-3">Both <code className="bg-[#d1fae5] px-1.5 py-0.5 rounded text-[#10b981]">.csv</code> and <code className="bg-[#d1fae5] px-1.5 py-0.5 rounded text-[#10b981]">.xlsx</code> files are supported. Validation checks are run automatically before final processing.</p>
-                    <button className="px-4 py-2 bg-[#ffffff] hover:bg-[#ecfdf5] text-[#10b981] text-xs font-bold rounded-lg border border-[#a7f3d0] shadow-sm transition-colors">
-                      Download {importMode === "student" ? "Student" : "Faculty"} Template
-                    </button>
-                  </div>
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Academic Cycles</h2>
+                  <p className="text-sm text-[#6b6b80] mt-1">Manage academic cycles for your institution.</p>
                 </div>
-
-                <form className="space-y-6 max-w-2xl" onSubmit={async (e) => {
-                    e.preventDefault();
-                    setMessage({ text: `Upload processing implemented via /api/ams/eligibility/import${importMode === "faculty" ? "-faculty" : ""} endpoint.`, type: "success" });
-                }}>
-                   <div className="space-y-2">
-                     <label className="text-sm font-bold text-[#1a1a2e]">Academic Cycle</label>
-                     <select className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-4 py-3 text-sm text-[#1a1a2e] focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow">
-                       <option value="">Select an academic cycle...</option>
-                       <option value="c1">CS6001 - Fall 2026</option>
-                       <option value="c2">CS6002 - Spring 2027</option>
-                     </select>
-                   </div>
-                   
-                   <div className="space-y-2">
-                     <label className="text-sm font-bold text-[#1a1a2e]">Operation Type</label>
-                     <select className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-4 py-3 text-sm text-[#1a1a2e] focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow">
-                       <option value="upsert">Add new records and update existing records</option>
-                       <option value="revoke">Revoke eligibility for matching records</option>
-                     </select>
-                   </div>
-
-                   <div className="space-y-2">
-                     <label className="text-sm font-bold text-[#1a1a2e]">Choose File</label>
-                     <div className="border-2 border-dashed border-[#d4d4dc] rounded-xl p-8 text-center hover:bg-[#f7f7f9] transition-colors cursor-pointer">
-                        <input required type="file" accept=".csv,.xlsx" className="block w-full text-sm text-[#6b6b80] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#ecfdf5] file:text-[#10b981] hover:file:bg-[#d1fae5] cursor-pointer" />
-                     </div>
-                     <p className="text-xs text-[#6b6b80] mt-2">Maximum file size: 10MB.</p>
-                   </div>
-
-                   <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-[#d4d4dc]">
-                     <button type="button" onClick={() => setMessage({ text: "Preview mode not fully implemented. Run tests via backend.", type: "error" })} className="flex-1 py-3 bg-[#ffffff] hover:bg-[#f7f7f9] text-[#1a1a2e] text-sm font-bold rounded-xl transition-all border border-[#d4d4dc] shadow-sm">
-                       Review Changes (Preview)
-                     </button>
-                     <button type="submit" className="flex-1 py-3 bg-[#10b981] hover:bg-teal-700 text-[#ffffff] text-sm font-bold rounded-xl transition-all shadow-sm shadow-teal-500/20">
-                       Confirm and Import
-                     </button>
-                   </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-                                    EXPORTS 
-        ========================================================================= */}
-        {activeTab === "exports" && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Authorized Exports</h2>
-              <p className="text-sm text-[#6b6b80] mt-1">Download operational reports safely. All exports are sanitized against formula injection.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-[#ffffff] border border-[#d4d4dc] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
-                    <Briefcase className="w-6 h-6" />
-                  </div>
-                </div>
-                <h3 className="font-bold text-[#1a1a2e] text-lg mb-2">Allocation Master Report</h3>
-                <p className="text-sm text-[#6b6b80] mb-8 flex-1">
-                  Complete report containing project IDs, team names, university domains, assigned faculty, and allocation status.
-                </p>
-                <button
-                  onClick={() => handleDownloadExport("allocations")}
-                  className="w-full flex justify-center items-center gap-2 py-3 bg-[#ffffff] border border-[#d4d4dc] hover:bg-[#f7f7f9] text-[#1a1a2e] text-sm font-bold rounded-xl transition-all shadow-sm"
-                >
-                  <Download className="w-4 h-4" /> Download CSV
+                <button onClick={() => { setEditingCycle(null); setCycleForm({ name: "", start_date: "", end_date: "", status: "draft" }); setShowCycleModal(true); }} className="px-4 py-2 bg-[#24cdd1] text-white text-sm font-bold rounded-lg shadow-sm hover:bg-[#1fb3b7] transition-colors flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> Create Cycle
                 </button>
               </div>
 
-              <div className="bg-[#ffffff] border border-[#d4d4dc] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
-                    <Award className="w-6 h-6" />
-                  </div>
+              <div className="bg-[#ffffff] border border-[#d4d4dc] rounded-2xl overflow-hidden shadow-sm">
+                <div className="p-4 border-b border-[#d4d4dc] bg-[#f7f7f9]/50 flex justify-between items-center">
+                  <h3 className="font-bold text-[#1a1a2e]">All Cycles</h3>
+                  <span className="px-2 py-1 bg-[#e4e4e8] text-[#1a1a2e] text-xs font-bold rounded-lg">{academicCycles.length} Total</span>
                 </div>
-                <h3 className="font-bold text-[#1a1a2e] text-lg mb-2">Shared Evaluations Report</h3>
-                <p className="text-sm text-[#6b6b80] mb-8 flex-1">
-                  Contains ONLY evaluation scores that have been explicitly shared with Academic Administration by faculty members.
-                </p>
-                <button
-                  onClick={() => handleDownloadExport("shared_evaluations")}
-                  className="w-full flex justify-center items-center gap-2 py-3 bg-[#ffffff] border border-[#d4d4dc] hover:bg-[#f7f7f9] text-[#1a1a2e] text-sm font-bold rounded-xl transition-all shadow-sm"
-                >
-                  <Download className="w-4 h-4" /> Download CSV
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-                                    SUPER ADMIN - ADMINS/INSTITUTIONS 
-        ========================================================================= */}
-        {activeTab === "admins" && access.isSuperAdmin && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Academic Administrators</h2>
-              <p className="text-sm text-[#6b6b80] mt-1">Manage institutional administrative access and privileges.</p>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-[#ffffff] border border-[#d4d4dc] rounded-2xl overflow-hidden shadow-sm">
-                  <div className="p-4 border-b border-[#d4d4dc] bg-[#f7f7f9]/50 flex justify-between items-center">
-                    <h3 className="font-bold text-[#1a1a2e]">Active Administrators</h3>
-                    <span className="px-2 py-1 bg-[#e4e4e8] text-[#1a1a2e] text-xs font-bold rounded-lg">{adminsData.admins.filter((a: any) => a.status !== "pending_onboarding").length} Total</span>
-                  </div>
-                  {adminsData.admins.filter((a: any) => a.status !== "pending_onboarding").length === 0 ? (
-                    <div className="p-8 text-center text-[#6b6b80] text-sm">No administrators found.</div>
-                  ) : (
-                    <div className="divide-y divide-slate-100">
-                      {adminsData.admins.filter((a: any) => a.status !== "pending_onboarding").map((a: any) => (
-                        <div key={a.id} className="p-4 flex items-center justify-between hover:bg-[#f7f7f9] transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
-                              {String(a?.name || a?.email || "A")[0].toUpperCase()}
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold text-[#1a1a2e]">{a.name || a.email}</p>
-                              <div className="flex items-center gap-2 text-xs font-mono text-[#6b6b80] mt-0.5">
-                                <span>{a.email}</span>
-                                <span className="text-slate-300">•</span>
-                                <span>{a.institution?.name || "Unknown Institution"}</span>
-                              </div>
-                              {(a.admin_position || a.contact_no) && (
-                                <div className="flex items-center gap-2 mt-1.5">
-                                  {a.admin_position && (
-                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[#f7f7f9] px-2 py-0.5 rounded text-[#6b6b80] border border-[#d4d4dc]">
-                                      {a.admin_position}
-                                    </span>
-                                  )}
-                                  {a.contact_no && (
-                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[#f7f7f9] px-2 py-0.5 rounded text-[#6b6b80] border border-[#d4d4dc]">
-                                      {a.contact_no}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className={`px-2.5 py-1 text-xs font-bold uppercase rounded-lg border ${
-                              a.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                              a.status === 'revoked' ? 'bg-red-50 text-red-700 border-red-200' :
-                              'bg-amber-50 text-amber-700 border-amber-200'
-                            }`}>
-                              {a.status}
-                            </span>
-                            <div className="flex flex-col gap-1 items-end ml-4 border-l border-slate-200 pl-4">
-                              {a.status === 'active' && (
-                                <button onClick={() => handleManageAdmin(a.id, 'suspend')} className="text-xs font-medium text-amber-600 hover:text-amber-800 transition-colors">Suspend (Temp)</button>
-                              )}
-                              {a.status === 'revoked' && (
-                                <button onClick={() => handleManageAdmin(a.id, 'restore')} className="text-xs font-medium text-emerald-600 hover:text-emerald-800 transition-colors">Restore Access</button>
-                              )}
-                              <button onClick={() => handleManageAdmin(a.id, 'delete')} className="text-xs font-medium text-red-600 hover:text-red-800 transition-colors">Delete Permanently</button>
-                            </div>
+                
+                {isLoadingCycles ? (
+                  <div className="p-8 text-center text-[#6b6b80] text-sm">Loading cycles...</div>
+                ) : academicCycles.length === 0 ? (
+                  <div className="p-8 text-center text-[#6b6b80] text-sm">No academic cycles found. Create one to get started.</div>
+                ) : (
+                  <div className="divide-y divide-[#e4e4e8]">
+                    {academicCycles.map((cycle: any) => (
+                      <div key={cycle.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#f7f7f9] transition-colors">
+                        <div>
+                          <p className="text-sm font-bold text-[#1a1a2e]">{cycle.name}</p>
+                          <div className="flex items-center gap-2 text-xs text-[#6b6b80] mt-1">
+                            <span>Start: {cycle.start_date ? new Date(cycle.start_date).toLocaleDateString() : ''}</span>
+                            <span>•</span>
+                            <span>End: {cycle.end_date ? new Date(cycle.end_date).toLocaleDateString() : ''}</span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {adminsData.invitations.length > 0 && (
-                  <div className="bg-[#ffffff] border border-[#d4d4dc] rounded-2xl overflow-hidden shadow-sm">
-                    <div className="p-4 border-b border-[#d4d4dc] bg-[#f7f7f9]/50 flex justify-between items-center">
-                      <h3 className="font-bold text-[#1a1a2e]">Pending Invitations</h3>
-                      <span className="px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold rounded-lg">{adminsData.invitations.length} Pending</span>
-                    </div>
-                    <div className="divide-y divide-slate-100">
-                      {adminsData.invitations.map((inv: any) => (
-                        <div key={inv.id} className="p-4 flex items-center justify-between hover:bg-[#f7f7f9] transition-colors">
-                          <div>
-                            <p className="text-sm font-bold text-[#1a1a2e]">{inv.email}</p>
-                            <p className="text-xs font-mono text-[#6b6b80]">{inv.university_domain}</p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="px-2.5 py-1 text-xs font-bold uppercase rounded-lg bg-slate-100 text-[#6b6b80] border border-[#d4d4dc]">
-                              {inv.status}
-                            </span>
-                            <button onClick={() => handleCancelInvite(inv.id)} className="text-xs font-medium text-red-600 hover:text-red-800 transition-colors ml-2 border-l border-slate-200 pl-3">Cancel</button>
+                        <div className="flex items-center gap-3">
+                          <span className={`px-2.5 py-1 text-xs font-bold uppercase rounded-lg border ${
+                            cycle.status === "active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                            cycle.status === "completed" ? "bg-blue-50 text-blue-700 border-blue-200" :
+                            cycle.status === "archived" ? "bg-slate-50 text-slate-700 border-slate-200" :
+                            "bg-amber-50 text-amber-700 border-amber-200"
+                          }`}>
+                            {cycle.status}
+                          </span>
+                          <div className="flex items-center gap-2 ml-2 border-l border-slate-200 pl-3">
+                            <button onClick={() => { setEditingCycle(cycle); setCycleForm({ name: cycle.name, start_date: cycle.start_date ? cycle.start_date.split("T")[0] : "", end_date: cycle.end_date ? cycle.end_date.split("T")[0] : "", status: cycle.status }); setShowCycleModal(true); }} className="text-xs font-medium text-indigo-600 hover:text-indigo-800">Edit</button>
+                            {(cycle.status === "draft" || cycle.status === "archived") && (
+                               <button onClick={() => handleDeleteCycle(cycle.id)} className="text-xs font-medium text-red-600 hover:text-red-800">Delete</button>
+                            )}
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
-
-              <div className="lg:col-span-1">
-                <form onSubmit={handleInviteAdmin} className="bg-[#ffffff] border border-[#d4d4dc] rounded-2xl p-6 shadow-sm sticky top-6">
-                  <h3 className="font-bold text-[#1a1a2e] mb-4 flex items-center gap-2">
-                    <UserCog className="w-5 h-5 text-[#10b981]" />
-                    Invite Administrator
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Email Address</label>
-                      <input 
-                        required
-                        type="email" 
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                        placeholder="admin@university.edu"
-                        className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Institution</label>
-                        <select 
-                          required
-                          value={inviteDomain}
-                          onChange={(e) => setInviteDomain(e.target.value)}
-                          className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow"
-                        >
-                          <option value="" disabled>Select an institution</option>
-                          {institutions.map(i => <option key={i.id} value={i.id}>{i.name} ({i.code})</option>)}
-                        </select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Temporary Password</label>
-                      <input 
-                        required
-                        type="text"
-                        value={tempPassword}
-                        onChange={(e) => setTempPassword(e.target.value)}
-                        placeholder="TempPassword123!"
-                        className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Full Name</label>
-                        <input 
-                          required
-                          type="text"
-                          value={inviteName}
-                          onChange={(e) => setInviteName(e.target.value)}
-                          placeholder="John Doe"
-                          className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Position</label>
-                        <input 
-                          required
-                          type="text"
-                          value={invitePosition}
-                          onChange={(e) => setInvitePosition(e.target.value)}
-                          placeholder="Dean of CS"
-                          className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#6b6b80] uppercase tracking-wider">Contact No. (Optional)</label>
-                      <input 
-                        type="text"
-                        value={inviteContactNo}
-                        onChange={(e) => setInviteContactNo(e.target.value)}
-                        placeholder="+1 234 567 890"
-                        className="w-full bg-[#ffffff] border border-[#d4d4dc] rounded-xl px-3 py-2.5 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-teal-500 outline-none transition-shadow"
-                      />
-                    </div>
-                    <button 
-                      type="submit"
-                      disabled={isInviting || !inviteEmail || !inviteDomain || !tempPassword || !inviteName || !invitePosition}
-                      className="w-full mt-2 py-2.5 bg-[#10b981] hover:bg-teal-700 text-[#ffffff] text-sm font-bold rounded-xl transition-all shadow-sm shadow-teal-500/20 disabled:opacity-50"
-                    >
-                      {isInviting ? "Provisioning..." : "Provision Account"}
-                    </button>
-                  </div>
-                </form>
-              </div>
             </div>
-          </div>
-        )}
-        
-        {activeTab === "institutions" && access.isSuperAdmin && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Registered Institutions</h2>
-              <p className="text-sm text-[#6b6b80] mt-1">Manage global university domains configured for AMS.</p>
-            </div>
-            
-            <div className="bg-[#ffffff] border border-[#d4d4dc] rounded-2xl overflow-hidden shadow-sm">
-              <div className="p-4 border-b border-[#d4d4dc] bg-[#f7f7f9]/50 flex justify-between items-center">
-                <h3 className="font-bold text-[#1a1a2e]">Institutions</h3>
-                <span className="px-2 py-1 bg-[#e4e4e8] text-[#1a1a2e] text-xs font-bold rounded-lg">{institutions.length} Total</span>
-              </div>
-              {institutions.length === 0 ? (
-                <div className="p-8 text-center text-[#6b6b80] text-sm">No institutions found. Ensure admins are invited first.</div>
-              ) : (
-                <div className="divide-y divide-slate-100">
-                  {institutions.map((inst: any) => (
-                    <div key={inst.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#f7f7f9] transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                          <Building2 className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="text-lg font-bold text-[#1a1a2e] font-mono">{inst.name} <span className="text-sm font-normal text-slate-500">({inst.code})</span></p>
-                          <p className="text-xs text-[#6b6b80]">First activity: {inst.created_at ? new Date(inst.created_at).toLocaleDateString() : 'N/A'}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-6 text-sm">
-                        <div className="text-center">
-                          <p className="font-bold text-[#1a1a2e]">{inst.adminCount}</p>
-                          <p className="text-xs text-[#6b6b80] uppercase tracking-wider">Admins</p>
-                        </div>
-                        <div className="w-px h-8 bg-[#d4d4dc]"></div>
-                        <div className="text-center">
-                          <p className="font-bold text-[#1a1a2e]">{inst.cycleCount}</p>
-                          <p className="text-xs text-[#6b6b80] uppercase tracking-wider">Cycles</p>
-                        </div>
-                        <div className="w-px h-8 bg-[#d4d4dc]"></div>
-                        <div className="text-center">
-                          <p className="font-bold text-[#1a1a2e]">{inst.pendingInvites}</p>
-                          <p className="text-xs text-[#6b6b80] uppercase tracking-wider">Invites</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        
-        {activeTab === "audit" && access.isSuperAdmin && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Audit Log</h2>
-              <p className="text-sm text-[#6b6b80] mt-1">Immutable record of all administrative state changes.</p>
-            </div>
-            {renderEmptyState("Audit Log Encrypted", "The audit log requires a specialized viewer role which is not currently mapped in this UI session.", History)}
-          </div>
-        )}
-
-        {/* =========================================================================
-                                    PLACEHOLDERS 
-        ========================================================================= */}
-        {activeTab === "schemes" && (
-           <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Evaluation Schemes</h2>
-              <p className="text-sm text-[#6b6b80] mt-1">Define evaluation rubrics and group/individual component weightings.</p>
-            </div>
-            {renderEmptyState("No Schemes Configured", "Evaluation schemes cannot be managed from this dashboard yet. Faculty currently define their own schemes.", Award, "Create Scheme")}
-          </div>
-        )}
-
-        {activeTab === "faculty" && (
-           <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Faculty Capacity</h2>
-              <p className="text-sm text-[#6b6b80] mt-1">Manage maximum student load and group enforcement for faculty members.</p>
-            </div>
-            {renderEmptyState("Capacity Dashboard Unavailable", "Faculty capacity is currently handled automatically by the allocation engine.", Users)}
-          </div>
-        )}
-        
-        {activeTab === "students" && (
-           <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Students & Faculty</h2>
-              <p className="text-sm text-[#6b6b80] mt-1">View active users participating in current academic cycles.</p>
-            </div>
-            {renderEmptyState("Directory Sync Pending", "The user directory has not been synced to this dashboard. Please use the Cycles & Eligibility tab to import rosters.", Users)}
-          </div>
-        )}
+          )}
 
         {activeTab === "communications" && (
            <div className="space-y-6">
@@ -1001,6 +728,52 @@ export default function AmsDashboardPage() {
         )}
 
       </div>
+    
+      {/* CYCLE MODAL */}
+      {showCycleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+              <h3 className="font-bold text-slate-800">{editingCycle ? "Edit Cycle" : "Create Cycle"}</h3>
+              <button onClick={() => setShowCycleModal(false)} className="text-slate-400 hover:text-slate-600">×</button>
+            </div>
+            <form onSubmit={handleSaveCycle} className="p-4 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Cycle Name</label>
+                <input required type="text" placeholder="e.g. Fall 2026 Capstone" 
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                  value={cycleForm.name} onChange={e => setCycleForm({...cycleForm, name: e.target.value})} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Start Date</label>
+                  <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                    value={cycleForm.start_date} onChange={e => setCycleForm({...cycleForm, start_date: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">End Date</label>
+                  <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                    value={cycleForm.end_date} onChange={e => setCycleForm({...cycleForm, end_date: e.target.value})} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Status</label>
+                <select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
+                  value={cycleForm.status} onChange={e => setCycleForm({...cycleForm, status: e.target.value})}>
+                  <option value="draft">Draft (Setup phase)</option>
+                  <option value="active">Active (In progress)</option>
+                  <option value="completed">Completed (Evaluations done)</option>
+                  <option value="archived">Archived (Historical)</option>
+                </select>
+              </div>
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowCycleModal(false)} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-sm font-bold text-white bg-[#24cdd1] hover:bg-[#1fb3b7] rounded-lg">Save Cycle</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AmsShell>
   );
 }

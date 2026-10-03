@@ -14,7 +14,7 @@ export type AmsTab =
   | "reports" | "exports" | "communications";
 
 interface AmsShellProps {
-  access: { isSuperAdmin: boolean; isAdmin: boolean; domain: string | null; institutionName?: string | null; status: string };
+  access: { isSuperAdmin: boolean; isAdmin: boolean; domain: string | null; institutionName?: string | null; status: string; name?: string | null };
   user: { email: string } | null;
   activeTab: AmsTab;
   setActiveTab: (tab: AmsTab) => void;
@@ -29,10 +29,6 @@ export function AmsShell({ access, user, activeTab, setActiveTab, children }: Am
     { section: "ADMINISTRATION", items: [
       { id: "institutions", label: "Institutions", icon: Building2 },
       { id: "admins", label: "Academic Administrators", icon: UserCog }
-    ]},
-    { section: "ACADEMIC OVERSIGHT", items: [
-      { id: "cycles", label: "Academic Cycles", icon: BookOpen },
-      { id: "projects", label: "Projects & Allocations", icon: Briefcase }
     ]},
     { section: "GOVERNANCE", items: [{ id: "audit", label: "Audit Activity", icon: History }] }
   ];
@@ -113,7 +109,8 @@ export function AmsShell({ access, user, activeTab, setActiveTab, children }: Am
       {/* User / Exit */}
       <div className="p-4 space-y-3" style={{ borderTop: '1px solid #e4e4e8', backgroundColor: '#f9fafb' }}>
         <div className="px-3 py-2">
-          <p className="text-xs font-semibold truncate" style={{ color: '#1a1a2e' }}>{user?.email}</p>
+            {access.name && <p className="text-sm font-bold truncate mb-0.5" style={{ color: '#1a1a2e' }}>{access.name}</p>}
+            <p className="text-xs font-semibold truncate" style={{ color: access.name ? '#6b6b80' : '#1a1a2e' }}>{user?.email}</p>
           <p className="text-[10px] mt-0.5" style={{ color: '#6b6b80' }}>
             {access.isSuperAdmin ? "Global Access" : access.institutionName || access.domain || "Unknown Institution"}
           </p>

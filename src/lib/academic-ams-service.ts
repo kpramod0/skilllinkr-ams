@@ -30,28 +30,29 @@ export async function checkAmsAccess(authUserId: string): Promise<{
   domain: string | null;
   institutionId: string | null;
   institutionName: string | null;
+  name?: string | null;
   status: string;
 }> {
   if (!authUserId) {
-    return { isSuperAdmin: false, isAdmin: false, domain: null, institutionId: null, institutionName: null, status: "unauthenticated" };
+    return { isSuperAdmin: false, isAdmin: false, domain: null, institutionId: null, institutionName: null, status: "unauthenticated", name: null };
   }
 
   // 1. Check Super Admin (keyed by auth_user_id UUID)
   const { data: superAdmin } = await supabaseAdmin
     .from("academic_super_admin_profiles")
-    .select("status")
+    .select("status, name")
     .eq("auth_user_id", authUserId)
     .eq("status", "active")
     .maybeSingle();
 
   if (superAdmin) {
-    return { isSuperAdmin: true, isAdmin: true, domain: "*", institutionId: null, institutionName: "All Institutions", status: "active" };
+    return { isSuperAdmin: true, isAdmin: true, domain: "*", institutionId: null, institutionName: "All Institutions", status: "active", name: superAdmin.name };
   }
 
   // 2. Check Academic Admin (keyed by auth_user_id UUID), join institution name
   const { data: adminRow } = await supabaseAdmin
     .from("academic_admin_assignments")
-    .select("institution_id, status, institution:institutions(id, name, code)")
+    .select("institution_id, status, name, institution:institutions(id, name, code)")
     .eq("auth_user_id", authUserId)
     .in("status", ["active", "pending_onboarding"])
     .maybeSingle();
@@ -65,10 +66,11 @@ export async function checkAmsAccess(authUserId: string): Promise<{
       institutionId: adminRow.institution_id,
       institutionName: inst?.name ?? adminRow.institution_id,
       status: adminRow.status,
+        name: adminRow.name,
     };
   }
 
-  return { isSuperAdmin: false, isAdmin: false, domain: null, institutionId: null, institutionName: null, status: "denied" };
+  return { isSuperAdmin: false, isAdmin: false, domain: null, institutionId: null, institutionName: null, status: "denied", name: null };
 }
 
 /**

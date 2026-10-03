@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       // Temporarily revoke access (prohibits login but keeps history)
       const { error } = await supabaseAdmin
         .from("academic_admin_assignments")
-        .update({ status: "revoked", updated_at: new Date().toISOString() })
+        .update({ status: "suspended", updated_at: new Date().toISOString() })
         .eq("id", adminId);
       if (error) throw error;
       return NextResponse.json({ success: true, message: "Administrator access temporarily revoked." });
